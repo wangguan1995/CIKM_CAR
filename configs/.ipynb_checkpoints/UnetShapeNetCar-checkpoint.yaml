@@ -1,0 +1,32 @@
+base: !include base.yaml
+run_name: 'UNetShapeNetCar'
+project_name: "ShapeNetCar"
+
+# train setting
+num_epochs: 100
+batch_size: 4
+eval_batch_size: 1
+lr: 0.001
+device: cuda:0
+save_interval: 50
+
+# model setting
+mode: "train"
+model: "UNet"
+in_channels: 4
+out_channels: 1 # pressure
+num_levels: 4
+hidden_channels: 64
+use_position_input: True
+
+# dataset setting
+data_module: "CFDSDFDataModule"
+data_dir: "/home/aistudio/data/data/"           
+test_data_dir: "/home/aistudio/data/test_data_1/"      
+n_train: 10
+n_test: 1
+sdf_spatial_resolution: [64, 64, 64]
+point_data_pos: "press on mesh points" 
+
+# eval setting
+write_to_vtk: True
