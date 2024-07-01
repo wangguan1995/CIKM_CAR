@@ -16,7 +16,7 @@
 # Code is heavily based on paper "Geometry-Informed Neural Operator for Large-Scale 3D PDEs", we use paddle to reproduce the results of the paper
 
 
-from .ConvUNet2 import UNet3DWithSamplePoints, UNet3DWithSamplePointsAhmed
+from .ConvUNet2 import UNet3DWithSamplePoints
 
 
 # print the number of parameters

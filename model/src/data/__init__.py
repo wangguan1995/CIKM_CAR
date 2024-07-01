@@ -16,6 +16,8 @@
 
 
 from .cfd_datamodule import CFDSDFDataModule, CarDataModule
+from .velocity_datamodule import VelocityDataModule
+from .cd_datamodule import CdDataModule
 
 
 def instantiate_datamodule(config):
@@ -28,8 +30,7 @@ def instantiate_datamodule(config):
             spatial_resolution=config.sdf_spatial_resolution,
             test_data_dir=config.test_data_dir,
         )
-
-    if config.data_module == "CarDataModule":
+    elif config.data_module == "CarDataModule":
         assert config.sdf_spatial_resolution is not None
         return CarDataModule(
             config.data_dir,
@@ -37,6 +38,22 @@ def instantiate_datamodule(config):
             config.n_train,
             config.n_test,
             spatial_resolution=config.sdf_spatial_resolution,
+        )
+    elif config.data_module == "VelocityDataModule":
+        assert config.sdf_spatial_resolution is not None
+        return VelocityDataModule(
+            config.train_data_dir,
+            config.test_data_dir,
+            config.train_index_list,
+            config.test_index_list,
+        )
+    elif config.data_module == "CdDataModule":
+        assert config.sdf_spatial_resolution is not None
+        return CdDataModule(
+            config.train_data_dir,
+            config.test_data_dir,
+            config.train_index_list,
+            config.test_index_list,
         )
 
     else:

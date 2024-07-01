@@ -663,7 +663,6 @@ class CarDataModule(CFDSDFDataModule):
         self, data_dir: Path, subfolder: str, mesh_index: int
     ) -> np.ndarray:
         press_path = self.get_pressure_data_path(data_dir, subfolder, mesh_index)
-        print(press_path)
         assert press_path.exists(), "Pressure data does not exist"
         press = np.load(press_path).reshape((-1,)).astype(np.float32)
         return press

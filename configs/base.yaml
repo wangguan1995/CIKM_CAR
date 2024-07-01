@@ -1,13 +1,12 @@
 # Define learning rate yaml
-lr: 0.001
+lr: 0.002
 num_epochs: 200
 batch_size: 4
 
 # Logger
-# logger_types: ["tensorboard"] # ["tensorboard", "wandb"]
 logger_types: ["tensorboard"] # ["tensorboard", "wandb"]
 log_dir: "logs/"
-eval_interval: 5 # epoch
+eval_interval: 50 # epoch
 project_name: "car-cfd"
 run_name: "default"
 entity: 'nvr-ai-algo'
