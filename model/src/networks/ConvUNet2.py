@@ -512,75 +512,34 @@ class UNet3DWithSamplePoints(UNet3D):
     @paddle.no_grad()
     def eval_dict(self, data_dict, loss_fn=None, decode_fn=None, **kwargs):
         input_grid_features, output_points = self.data_dict_to_input(data_dict)
-        p_predict = self(input_grid_features, output_points)
-        p_predict_decode = decode_fn(p_predict)
-        out_dict = {}
-        out_dict['pressure'] = p_predict
-
-        if loss_fn is not None:
-            p_label = data_dict['pressure'].unsqueeze(-1)
-            p_label_decode = decode_fn(p_label)
-            out_dict['l2'] = loss_fn(p_predict, p_label)
-            out_dict['l2_decoded'] = loss_fn(p_predict_decode, p_label_decode)
-        return out_dict
+        pred_var = self(input_grid_features, output_points)
+        true_var = None
+        true_var_key = None
+        if 'pressure' in data_dict.keys():
+            true_var = data_dict['pressure'].unsqueeze(-1)
+            true_var_key = 'pressure'
+        elif "velocity" in data_dict.keys():
+            true_var =  data_dict['velocity']
+            true_var_key = 'velocity'
+        elif "cd" in data_dict.keys():
+            true_var =  data_dict['cd']
+            true_var_key = 'cd'
+        else:
+            raise NotImplementedError("only pressure velocity works")
+        return {'l2 eval loss': loss_fn(pred_var, true_var), true_var_key:true_var}
 
     def loss_dict(self, data_dict, loss_fn=None, **kwargs):
         input_grid_features, output_points = self.data_dict_to_input(data_dict)
+        pred_var = self(input_grid_features, output_points)
+        true_var = None
+        if 'pressure' in data_dict.keys():
+            true_var = data_dict['pressure'].unsqueeze(-1)
+        elif "velocity" in data_dict.keys():
+            true_var =  data_dict['velocity']
+        elif "cd" in data_dict.keys():
+            true_var =  data_dict['cd']
+        else:
+            raise NotImplementedError("only pressure velocity works")
 
-        vert_sdf = self(input_grid_features, output_points)
-        gt_pressure = data_dict['pressure'].unsqueeze(-1)
+        return {'loss': loss_fn(pred_var, true_var)}
 
-        if loss_fn is None:
-            loss_fn = self.loss
-        return {'loss': loss_fn(vert_sdf, gt_pressure)}
-
-
-class UNet3DWithSamplePointsAhmed(UNet3DWithSamplePoints):
-
-    def __init__(self, in_channels: int, out_channels: int, hidden_channels:
-        int, num_levels: int, use_position_input: bool=True,
-        subsample_train=1, subsample_eval=1):
-        self.subsample_train = subsample_train
-        self.subsample_eval = subsample_eval
-        super().__init__(in_channels=in_channels, out_channels=out_channels,
-            hidden_channels=hidden_channels, num_levels=num_levels,
-            use_position_input=use_position_input)
-
-    def data_dict_to_input(self, data_dict):
-        x_in = data_dict['centroids'][0].unsqueeze(axis=0)
-        x_out = data_dict['df_query_points']
-        df = data_dict['df'].unsqueeze(axis=0)
-        vel = paddle.to_tensor(data=[data_dict['info'][0]['velocity']])
-        vel = vel * paddle.ones_like(x=df)
-        input_grid_features = paddle.concat(x=(df, vel, x_out), axis=1)
-        input_grid_features, x_in = input_grid_features.to(self.device
-            ), x_in
-        
-        return input_grid_features, x_in
-
-    @paddle.no_grad()
-    def eval_dict(self, data_dict, loss_fn=None, decode_fn=None, **kwargs):
-        input_grid_features, output_points = self.data_dict_to_input(data_dict)
-        output_points = output_points[:, ::self.subsample_train]
-        pred = self(input_grid_features, output_points)
-        
-        out_dict = {'l2': loss_fn(pred, truth)}
-        if decode_fn is not None:
-            pred = decode_fn(pred)
-            out_dict['pred p'] = pred
-            if loss_fn is None:
-                loss_fn = self.loss
-                truth = data_dict['pressure'][0][::self.subsample_eval]
-                truth = decode_fn(truth)
-                out_dict['l2_decoded'] = loss_fn(pred, truth)
-        return out_dict
-
-    def loss_dict(self, data_dict, loss_fn=None):
-        input_grid_features, output_points = self.data_dict_to_input(data_dict)
-        output_points = output_points[:, ::self.subsample_train]
-        pred = self(input_grid_features, output_points)
-        if loss_fn is None:
-            loss_fn = self.loss
-            p = pred
-            p_ref = data_dict['pressure'][0][::self.subsample_train]
-            return {'loss': loss_fn(p, p_ref), 'p': p}

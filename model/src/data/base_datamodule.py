@@ -43,6 +43,5 @@ class BaseDataModule:
 
     def test_dataloader(self, **kwargs) ->paddle.io.DataLoader:
         collate_fn = getattr(self, 'collate_fn', None)
-
         return paddle.io.DataLoader(self.test_data, collate_fn=
             collate_fn, **kwargs)

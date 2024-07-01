@@ -4,9 +4,9 @@ project_name: "ShapeNetCar"
 
 # train setting
 num_epochs: 10
-batch_size: 4
+batch_size: 1
 eval_batch_size: 1
-lr: 0.005
+lr: 0.001
 device: cuda:0
 save_interval: 50
 
@@ -14,22 +14,21 @@ save_interval: 50
 mode: "train"
 model: "UNet"
 in_channels: 4
-out_channels: 1 # pressure
+out_channels: 3 # velociy x, velociy y, velociy z
 num_levels: 4
 hidden_channels: 64
 use_position_input: True
 
 # dataset setting
-data_module: "CFDSDFDataModule"
-data_dir: "/home/aistudio/data/data/"           
-test_data_dir: "/home/aistudio/data/test_data_1/"      
-n_train: 10
+data_module: "CdDataModule"
+train_data_dir: "/home/aistudio/data/train_data_2_cd"           
+test_data_dir: "/home/aistudio/data/train_data_2_cd"      
+n_train: 1
 n_test: 1
 sdf_spatial_resolution: [64, 64, 64]
 point_data_pos: "press on mesh points" 
 
 # eval setting
-write_to_vtk: True
-out_keys: ["pressure"]
-track : "Dataset_1_pressure"
-
+write_to_vtk: false
+out_keys: ["Cd"]
+track : "Dataset_2_Cd"
