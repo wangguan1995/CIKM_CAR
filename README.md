@@ -4,9 +4,6 @@
 - https://aistudio.baidu.com/datasetdetail/281827
 
 # ToDo
-- DataSet for Data 1 velocity
-- DataSet for Data 2 geometry
-- Review code
-- Review Data 1 velocity
-- Review Data 1 Drag Coefficient
-- Review Data 2 Geometry
+- Extend DataSet size to 500, for Data 1 velocity
+- Extend DataSet size to 500, for Data 2 geometry
+- sdf for Cd and Velocity
